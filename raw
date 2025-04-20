@@ -1,2 +1,247 @@
--- This is a sample Lua script
-print("Hello, World!")
+-- 📌 LocalScript (вставь в StarterPlayerScripts или под exploit)
+
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+local UIS = game:GetService("UserInputService")
+local dragging, dragInput, dragStart, startPos
+
+-- Удалить старое GUI если есть
+if player.PlayerGui:FindFirstChild("JJGui") then
+	player.PlayerGui.JJGui:Destroy()
+end
+
+-- Создание GUI
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "JJGui"
+gui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame", gui)
+mainFrame.Size = UDim2.new(0, 300, 0, 400)
+mainFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.Active = true
+mainFrame.Draggable = false
+
+local corner = Instance.new("UICorner", mainFrame)
+corner.CornerRadius = UDim.new(0, 10)
+
+-- Заголовок и кнопка закрытия
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1, -30, 0, 30)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.Text = "JJStyle GUI - 20 Functions"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local closeButton = Instance.new("TextButton", mainFrame)
+closeButton.Size = UDim2.new(0, 25, 0, 25)
+closeButton.Position = UDim2.new(1, -30, 0, 2)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.new(1, 0.3, 0.3)
+closeButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+closeButton.Font = Enum.Font.Gotham
+closeButton.TextSize = 14
+Instance.new("UICorner", closeButton)
+
+closeButton.MouseButton1Click:Connect(function()
+	gui:Destroy()
+end)
+
+-- Перетаскивание окна
+mainFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = mainFrame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+-- ScrollArea
+local scroll = Instance.new("ScrollingFrame", mainFrame)
+scroll.Size = UDim2.new(1, -20, 1, -50)
+scroll.Position = UDim2.new(0, 10, 0, 40)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 1000)
+scroll.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+scroll.BorderSizePixel = 0
+scroll.ScrollBarThickness = 6
+Instance.new("UICorner", scroll)
+
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0, 5)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- 🧠 Создание кнопки
+local function createButton(text, callback)
+	local btn = Instance.new("TextButton", scroll)
+	btn.Size = UDim2.new(1, -10, 0, 30)
+	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	btn.Text = text
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 13
+	Instance.new("UICorner", btn)
+	btn.MouseButton1Click:Connect(callback)
+end
+
+-- 🛠️ 20 ФУНКЦИЙ:
+createButton("Speed Hack", function()
+	player.Character.Humanoid.WalkSpeed = 100
+end)
+
+createButton("Jump Boost", function()
+	player.Character.Humanoid.JumpPower = 120
+end)
+
+createButton("Infinite Jump", function()
+	UIS.JumpRequest:Connect(function()
+		player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+	end)
+end)
+
+createButton("Noclip", function()
+	game:GetService("RunService").Stepped:Connect(function()
+		for _, part in pairs(player.Character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end)
+end)
+
+createButton("BTools", function()
+	for i = 2, 4 do
+		local tool = Instance.new("HopperBin", player.Backpack)
+		tool.BinType = i
+	end
+end)
+
+createButton("ESP Players", function()
+	for _, plr in pairs(game.Players:GetPlayers()) do
+		if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
+			local tag = Instance.new("BillboardGui", plr.Character.Head)
+			tag.Size = UDim2.new(0, 100, 0, 20)
+			tag.AlwaysOnTop = true
+			local label = Instance.new("TextLabel", tag)
+			label.Size = UDim2.new(1, 0, 1, 0)
+			label.BackgroundTransparency = 1
+			label.TextColor3 = Color3.fromRGB(255, 0, 0)
+			label.Text = plr.Name
+		end
+	end
+end)
+
+createButton("Fly (E Toggle)", function()
+	local flying = false
+	local bv
+	UIS.InputBegan:Connect(function(key)
+		if key.KeyCode == Enum.KeyCode.E then
+			flying = not flying
+			if flying then
+				bv = Instance.new("BodyVelocity", player.Character.HumanoidRootPart)
+				bv.Velocity = Vector3.new(0, 50, 0)
+				bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+			else
+				if bv then bv:Destroy() end
+			end
+		end
+	end)
+end)
+
+createButton("Click TP", function()
+	mouse.Button1Down:Connect(function()
+		if mouse.Target then
+			player.Character.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.p + Vector3.new(0, 5, 0))
+		end
+	end)
+end)
+
+createButton("FullBright", function()
+	local light = game:GetService("Lighting")
+	light.Brightness = 2
+	light.ClockTime = 14
+	light.FogEnd = 1e10
+	light.GlobalShadows = false
+end)
+
+createButton("No Fall Damage", function()
+	player.Character.Humanoid.StateChanged:Connect(function(_, state)
+		if state == Enum.HumanoidStateType.Freefall then
+			player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+		end
+	end)
+end)
+
+createButton("God Mode (Fake)", function()
+	player.Character.Humanoid.Name = "FakeGod"
+end)
+
+createButton("Remove Legs", function()
+	local char = player.Character
+	for _, v in pairs({"Left Leg", "Right Leg", "LeftLowerLeg", "RightLowerLeg"}) do
+		if char:FindFirstChild(v) then
+			char[v]:Destroy()
+		end
+	end
+end)
+
+createButton("FOV Changer (120)", function()
+	workspace.CurrentCamera.FieldOfView = 120
+end)
+
+createButton("Lag Switch (F)", function()
+	local conn
+	UIS.InputBegan:Connect(function(key)
+		if key.KeyCode == Enum.KeyCode.F then
+			if not conn then
+				conn = game:GetService("RunService").Stepped:Connect(function()
+					settings().Network.IncomingReplicationLag = 10
+				end)
+			else
+				conn:Disconnect()
+				settings().Network.IncomingReplicationLag = 0
+				conn = nil
+			end
+		end
+	end)
+end)
+
+createButton("Low Gravity", function()
+	workspace.Gravity = 50
+end)
+
+createButton("AntiAFK", function()
+	local vu = game:GetService("VirtualUser")
+	player.Idled:Connect(function()
+		vu:Button2Down(Vector2.new())
+		wait(1)
+		vu:Button2Up(Vector2.new())
+	end)
+end)
+
+createButton("Delete Tools", function()
+	for _, t in pairs(player.Backpack:GetChildren()) do
+		t:Destroy()
+	end
+end)
+
+createButton("Walk on Water", function()
+	game:GetService("Workspace").Terrain.WaterTransparency = 1
+	player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
+end)
+
+print("✅ JJStyle GUI: Активировано с 20 функциями!")
