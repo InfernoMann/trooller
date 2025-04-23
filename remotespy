@@ -1,0 +1,128 @@
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+if CoreGui:FindFirstChild("RealRemoteSpy") then
+	CoreGui.RealRemoteSpy:Destroy()
+end
+
+local gui = Instance.new("ScreenGui", CoreGui)
+gui.Name = "RealRemoteSpy"
+gui.ResetOnSpawn = false
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 500, 0, 300)
+main.Position = UDim2.new(0, 10, 0.5, -150)
+main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+main.BorderSizePixel = 0
+
+-- Делаем фрейм перетаскиваемым
+main.Active = true
+main.Draggable = true
+
+
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+title.Text = "🔥 Remote Spy (FireServer)"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 20
+
+local list = Instance.new("ScrollingFrame", main)
+list.Size = UDim2.new(1, -10, 1, -40)
+list.Position = UDim2.new(0, 5, 0, 35)
+list.BackgroundTransparency = 1
+list.BorderSizePixel = 0
+list.ScrollBarThickness = 6
+list.CanvasSize = UDim2.new(0, 0, 10, 0)
+
+local layout = Instance.new("UIListLayout", list)
+layout.Padding = UDim.new(0, 6)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local function argsToString(args)
+	local strings = {}
+	for i,v in ipairs(args) do
+		if typeof(v) == "string" then
+			table.insert(strings, `"{v}"`)
+		elseif typeof(v) == "Instance" then
+			table.insert(strings, `game:GetService("{v.Parent and v.Parent.Name or '??'}"):FindFirstChild("{v.Name}")`)
+		else
+			table.insert(strings, tostring(v))
+		end
+	end
+	return table.concat(strings, ", ")
+end
+
+local function logRemote(remote, args)
+	local holder = Instance.new("Frame")
+	holder.Size = UDim2.new(1, -10, 0, 80)
+	holder.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	holder.BorderSizePixel = 0
+	holder.Parent = list
+
+	local nameLbl = Instance.new("TextLabel", holder)
+	nameLbl.Size = UDim2.new(1, -10, 0, 20)
+	nameLbl.Position = UDim2.new(0, 5, 0, 5)
+	nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+	nameLbl.Font = Enum.Font.Code
+	nameLbl.TextSize = 14
+	nameLbl.TextColor3 = Color3.new(1, 1, 1)
+	nameLbl.BackgroundTransparency = 1
+	nameLbl.Text = remote:GetFullName()
+
+	local copyBtn = Instance.new("TextButton", holder)
+	copyBtn.Size = UDim2.new(0, 100, 0, 25)
+	copyBtn.Position = UDim2.new(0, 5, 0, 30)
+	copyBtn.Text = "📋 Copy"
+	copyBtn.Font = Enum.Font.Code
+	copyBtn.TextSize = 14
+	copyBtn.TextColor3 = Color3.new(1, 1, 1)
+	copyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+
+	local execBtn = Instance.new("TextButton", holder)
+	execBtn.Size = UDim2.new(0, 100, 0, 25)
+	execBtn.Position = UDim2.new(0, 110, 0, 30)
+	execBtn.Text = "🚀 Run"
+	execBtn.Font = Enum.Font.Code
+	execBtn.TextSize = 14
+	execBtn.TextColor3 = Color3.new(1, 1, 1)
+	execBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 60)
+
+	local argString = argsToString(args)
+	local finalCode = `game:GetService("ReplicatedStorage"):FindFirstChild("{remote.Name}"):FireServer({argString})`
+
+	copyBtn.MouseButton1Click:Connect(function()
+		if setclipboard then
+			pcall(function()
+				setclipboard(finalCode)
+				copyBtn.Text = "✅ Copied"
+			end)
+		end
+	end)
+
+	execBtn.MouseButton1Click:Connect(function()
+		pcall(function()
+			remote:FireServer(unpack(args))
+		end)
+	end)
+end
+
+-- Подключаемся к уже существующим RemoteEvent'ам
+for _,v in ipairs(ReplicatedStorage:GetDescendants()) do
+	if v:IsA("RemoteEvent") then
+		v.OnClientEvent:Connect(function(...)
+			logRemote(v, {...})
+		end)
+	end
+end
+
+-- Следим за новыми RemoteEvent'ами
+ReplicatedStorage.DescendantAdded:Connect(function(obj)
+	if obj:IsA("RemoteEvent") then
+		obj.OnClientEvent:Connect(function(...)
+			logRemote(obj, {...})
+		end)
+	end
+end)
