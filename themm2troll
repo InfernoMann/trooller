@@ -1,0 +1,97 @@
+-- Скрипт для ЛОКАЛЬНОГО использования. Вставить в StarterPlayer > StarterPlayerScripts
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local localPlayer = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+-- UI
+local screenGui = Instance.new("ScreenGui", localPlayer:WaitForChild("PlayerGui"))
+screenGui.ResetOnSpawn = false
+
+local function createButton(name, position, callback)
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0, 150, 0, 40)
+	button.Position = position
+	button.Text = name
+	button.TextScaled = true
+	button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.BorderSizePixel = 0
+	button.AutoButtonColor = true
+	button.Parent = screenGui
+
+	button.MouseButton1Click:Connect(callback)
+	return button
+end
+
+-- Highlight Role
+local function highlightPlayer(player, color)
+	local character = player.Character
+	if character and not character:FindFirstChild("RoleHighlight") then
+		local highlight = Instance.new("Highlight")
+		highlight.Name = "RoleHighlight"
+		highlight.FillColor = color
+		highlight.OutlineColor = Color3.new(1, 1, 1)
+		highlight.FillTransparency = 0.3
+		highlight.Parent = character
+	end
+end
+
+-- Reveal roles (находит по оружию)
+local function getRoles()
+	local murderer, sheriff = nil, nil
+	for _, player in pairs(Players:GetPlayers()) do
+		if player ~= localPlayer and player.Character then
+			local hasKnife = player.Backpack:FindFirstChild("Knife") or player.Character:FindFirstChild("Knife")
+			local hasGun = player.Backpack:FindFirstChild("Gun") or player.Character:FindFirstChild("Gun")
+
+			if hasKnife then
+				murderer = player
+			elseif hasGun then
+				sheriff = player
+			end
+		end
+	end
+	return murderer, sheriff
+end
+
+-- Teleport
+local function teleportTo(player)
+	if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+		local root = player.Character.HumanoidRootPart
+		local myChar = localPlayer.Character
+		if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+			myChar.HumanoidRootPart.CFrame = root.CFrame + Vector3.new(2, 0, 0)
+		end
+	end
+end
+
+-- Кнопки GUI
+createButton("🔍 Reveal Roles", UDim2.new(0, 20, 0, 100), function()
+	local murderer, sheriff = getRoles()
+	if murderer then
+		highlightPlayer(murderer, Color3.fromRGB(255, 0, 0))
+	end
+	if sheriff then
+		highlightPlayer(sheriff, Color3.fromRGB(0, 0, 255))
+	end
+end)
+
+createButton("⚔️ Teleport to Murderer", UDim2.new(0, 20, 0, 150), function()
+	local murderer, _ = getRoles()
+	teleportTo(murderer)
+end)
+
+createButton("🔫 Teleport to Sheriff", UDim2.new(0, 20, 0, 200), function()
+	local _, sheriff = getRoles()
+	teleportTo(sheriff)
+end)
+
+-- Опционально: обновление хайлайтов
+RunService.RenderStepped:Connect(function()
+	local murderer, sheriff = getRoles()
+	if murderer then highlightPlayer(murderer, Color3.fromRGB(255, 0, 0)) end
+	if sheriff then highlightPlayer(sheriff, Color3.fromRGB(0, 0, 255)) end
+end)
