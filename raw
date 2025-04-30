@@ -1,247 +1,670 @@
--- 📌 LocalScript (вставь в StarterPlayerScripts или под exploit)
-
-local player = game.Players.LocalPlayer
-local mouse = player:GetMouse()
-local UIS = game:GetService("UserInputService")
-local dragging, dragInput, dragStart, startPos
-
--- Удалить старое GUI если есть
-if player.PlayerGui:FindFirstChild("JJGui") then
-	player.PlayerGui.JJGui:Destroy()
-end
-
--- Создание GUI
-local gui = Instance.new("ScreenGui", player.PlayerGui)
-gui.Name = "JJGui"
-gui.ResetOnSpawn = false
-
-local mainFrame = Instance.new("Frame", gui)
-mainFrame.Size = UDim2.new(0, 300, 0, 400)
-mainFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-mainFrame.Active = true
-mainFrame.Draggable = false
-
-local corner = Instance.new("UICorner", mainFrame)
-corner.CornerRadius = UDim.new(0, 10)
-
--- Заголовок и кнопка закрытия
-local title = Instance.new("TextLabel", mainFrame)
-title.Size = UDim2.new(1, -30, 0, 30)
-title.Position = UDim2.new(0, 10, 0, 0)
-title.Text = "JJStyle GUI - 20 Functions"
-title.TextColor3 = Color3.new(1, 1, 1)
-title.BackgroundTransparency = 1
-title.Font = Enum.Font.GothamBold
-title.TextSize = 14
-title.TextXAlignment = Enum.TextXAlignment.Left
-
-local closeButton = Instance.new("TextButton", mainFrame)
-closeButton.Size = UDim2.new(0, 25, 0, 25)
-closeButton.Position = UDim2.new(1, -30, 0, 2)
-closeButton.Text = "X"
-closeButton.TextColor3 = Color3.new(1, 0.3, 0.3)
-closeButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-closeButton.Font = Enum.Font.Gotham
-closeButton.TextSize = 14
-Instance.new("UICorner", closeButton)
-
-closeButton.MouseButton1Click:Connect(function()
-	gui:Destroy()
-end)
-
--- Перетаскивание окна
-mainFrame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = input.Position
-		startPos = mainFrame.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-		local delta = input.Position - dragStart
-		mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
-end)
-
--- ScrollArea
-local scroll = Instance.new("ScrollingFrame", mainFrame)
-scroll.Size = UDim2.new(1, -20, 1, -50)
-scroll.Position = UDim2.new(0, 10, 0, 40)
-scroll.CanvasSize = UDim2.new(0, 0, 0, 1000)
-scroll.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-scroll.BorderSizePixel = 0
-scroll.ScrollBarThickness = 6
-Instance.new("UICorner", scroll)
-
-local layout = Instance.new("UIListLayout", scroll)
-layout.Padding = UDim.new(0, 5)
-layout.SortOrder = Enum.SortOrder.LayoutOrder
-
--- 🧠 Создание кнопки
-local function createButton(text, callback)
-	local btn = Instance.new("TextButton", scroll)
-	btn.Size = UDim2.new(1, -10, 0, 30)
-	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-	btn.Text = text
-	btn.TextColor3 = Color3.new(1, 1, 1)
-	btn.Font = Enum.Font.Gotham
-	btn.TextSize = 13
-	Instance.new("UICorner", btn)
-	btn.MouseButton1Click:Connect(callback)
-end
-
--- 🛠️ 20 ФУНКЦИЙ:
-createButton("Speed Hack", function()
-	player.Character.Humanoid.WalkSpeed = 100
-end)
-
-createButton("Jump Boost", function()
-	player.Character.Humanoid.JumpPower = 120
-end)
-
-createButton("Infinite Jump", function()
-	UIS.JumpRequest:Connect(function()
-		player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-	end)
-end)
-
-createButton("Noclip", function()
-	game:GetService("RunService").Stepped:Connect(function()
-		for _, part in pairs(player.Character:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
-		end
-	end)
-end)
-
-createButton("BTools", function()
-	for i = 2, 4 do
-		local tool = Instance.new("HopperBin", player.Backpack)
-		tool.BinType = i
-	end
-end)
-
-createButton("ESP Players", function()
-	for _, plr in pairs(game.Players:GetPlayers()) do
-		if plr ~= player and plr.Character and plr.Character:FindFirstChild("Head") then
-			local tag = Instance.new("BillboardGui", plr.Character.Head)
-			tag.Size = UDim2.new(0, 100, 0, 20)
-			tag.AlwaysOnTop = true
-			local label = Instance.new("TextLabel", tag)
-			label.Size = UDim2.new(1, 0, 1, 0)
-			label.BackgroundTransparency = 1
-			label.TextColor3 = Color3.fromRGB(255, 0, 0)
-			label.Text = plr.Name
-		end
-	end
-end)
-
-createButton("Fly (E Toggle)", function()
-	local flying = false
-	local bv
-	UIS.InputBegan:Connect(function(key)
-		if key.KeyCode == Enum.KeyCode.E then
-			flying = not flying
-			if flying then
-				bv = Instance.new("BodyVelocity", player.Character.HumanoidRootPart)
-				bv.Velocity = Vector3.new(0, 50, 0)
-				bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-			else
-				if bv then bv:Destroy() end
-			end
-		end
-	end)
-end)
-
-createButton("Click TP", function()
-	mouse.Button1Down:Connect(function()
-		if mouse.Target then
-			player.Character.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.p + Vector3.new(0, 5, 0))
-		end
-	end)
-end)
-
-createButton("FullBright", function()
-	local light = game:GetService("Lighting")
-	light.Brightness = 2
-	light.ClockTime = 14
-	light.FogEnd = 1e10
-	light.GlobalShadows = false
-end)
-
-createButton("No Fall Damage", function()
-	player.Character.Humanoid.StateChanged:Connect(function(_, state)
-		if state == Enum.HumanoidStateType.Freefall then
-			player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-		end
-	end)
-end)
-
-createButton("God Mode (Fake)", function()
-	player.Character.Humanoid.Name = "FakeGod"
-end)
-
-createButton("Remove Legs", function()
-	local char = player.Character
-	for _, v in pairs({"Left Leg", "Right Leg", "LeftLowerLeg", "RightLowerLeg"}) do
-		if char:FindFirstChild(v) then
-			char[v]:Destroy()
-		end
-	end
-end)
-
-createButton("FOV Changer (120)", function()
-	workspace.CurrentCamera.FieldOfView = 120
-end)
-
-createButton("Lag Switch (F)", function()
-	local conn
-	UIS.InputBegan:Connect(function(key)
-		if key.KeyCode == Enum.KeyCode.F then
-			if not conn then
-				conn = game:GetService("RunService").Stepped:Connect(function()
-					settings().Network.IncomingReplicationLag = 10
-				end)
-			else
-				conn:Disconnect()
-				settings().Network.IncomingReplicationLag = 0
-				conn = nil
-			end
-		end
-	end)
-end)
-
-createButton("Low Gravity", function()
-	workspace.Gravity = 50
-end)
-
-createButton("AntiAFK", function()
-	local vu = game:GetService("VirtualUser")
-	player.Idled:Connect(function()
-		vu:Button2Down(Vector2.new())
-		wait(1)
-		vu:Button2Up(Vector2.new())
-	end)
-end)
-
-createButton("Delete Tools", function()
-	for _, t in pairs(player.Backpack:GetChildren()) do
-		t:Destroy()
-	end
-end)
-
-createButton("Walk on Water", function()
-	game:GetService("Workspace").Terrain.WaterTransparency = 1
-	player.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
-end)
-
-print("✅ JJStyle GUI: Активировано с 20 функциями!")
+-- _0xABC123
+local _0x1=game:GetService("Players")local _0x2=_0x1.LocalPlayer local _0x3=game:GetService("UserInputService")local _0x4=game:GetService("TweenService")local _0x5=game:GetService("RunService")local _0x6=game:GetService("HttpService")local _0x7=game:GetService("Workspace")local _0x8=game:GetService("Lighting")local _0x9=game:GetService("StarterGui")local _0xA=game:GetService("ReplicatedStorage")local _0xB=game:GetService("SoundService")local _0xC=Instance.new("ScreenGui")_0xC.Name="_0xDEF456"_0xC.Parent=_0x2:WaitForChild("PlayerGui")_0xC.ResetOnSpawn=false _0xC.ZIndexBehavior=Enum.ZIndexBehavior.Sibling local _0xD=Instance.new("Frame")_0xD.Size=UDim2.new(0,600,0,400)_0xD.Position=UDim2.new(0.5,-300,0.5,-200)_0xD.BackgroundColor3=Color3.fromRGB(255,140,0)_0xD.BorderSizePixel=0 _0xD.Parent=_0xC local _0xE=Instance.new("UIStroke")_0xE.Thickness=3 _0xE.Color=Color3.fromRGB(147,112,219)_0xE.ApplyStrokeMode=Enum.ApplyStrokeMode.Border _0xE.Parent=_0xD local _0xF=Instance.new("UICorner")_0xF.CornerRadius=UDim.new(0,10)_0xF.Parent=_0xD local _0xG=Instance.new("TextLabel")_0xG.Size=UDim2.new(1,-50,0,50)_0xG.Position=UDim2.new(0,0,0,0)_0xG.BackgroundTransparency=1 _0xG.Text="_0xGHI789 v1.0"_0xG.TextColor3=Color3.fromRGB(255,255,0)_0xG.TextSize=28 _0xG.Font=Enum.Font.FredokaOne _0xG.Parent=_0xD local _0xH=Instance.new("TextButton")_0xH.Size=UDim2.new(0,40,0,40)_0xH.Position=UDim2.new(1,-45,0,5)_0xH.BackgroundColor3=Color3.fromRGB(255,69,0)_0xH.Text="X"_0xH.TextColor3=Color3.fromRGB(255,255,255)_0xH.TextSize=20 _0xH.Font=Enum.Font.FredokaOne _0xH.Parent=_0xD local _0xI=Instance.new("UICorner")_0xI.CornerRadius=UDim.new(0,5)_0xI.Parent=_0xH local _0xJ=Instance.new("Frame")_0xJ.Size=UDim2.new(0,150,1,-50)_0xJ.Position=UDim2.new(0,0,0,50)_0xJ.BackgroundColor3=Color3.fromRGB(255,165,0)_0xJ.Parent=_0xD local _0xK=Instance.new("Frame")_0xK.Size=UDim2.new(0,450,1,-50)_0xK.Position=UDim2.new(0,150,0,50)_0xK.BackgroundColor3=Color3.fromRGB(255,160,50)_0xK.Parent=_0xD local _0xL=Instance.new("UICorner")_0xL.CornerRadius=UDim.new(0,8)_0xL.Parent=_0xK local _0xM=Instance.new("ScrollingFrame")_0xM.Size=UDim2.new(1,0,1,0)_0xM.Position=UDim2.new(0,0,0,0)_0xM.BackgroundTransparency=1 _0xM.ScrollBarThickness=5 _0xM.Parent=_0xK local _0xN={_0xO1={},_0xO2={},_0xO3={},_0xO4={},_0xO5={},_0xO6={},_0xO7={},_0xO8={}}local _0xP="Movement" local function _0xQ(_0xR,_0xS)local _0xT=Instance.new("TextButton")_0xT.Size=UDim2.new(1,0,0,40)_0xT.Position=UDim2.new(0,0,0,_0xS*40)_0xT.BackgroundColor3=Color3.fromRGB(255,140,0)_0xT.Text=_0xR _0xT.TextColor3=Color3.fromRGB(255,255,255)_0xT.TextSize=18 _0xT.Font=Enum.Font.FredokaOne _0xT.Parent=_0xJ local _0xU=Instance.new("UICorner")_0xU.CornerRadius=UDim.new(0,5)_0xU.Parent=_0xT _0xT.MouseButton1Click:Connect(function()_0xP=_0xR for _0xV,_0xW in pairs(_0xN)do for _,_0xX in pairs(_0xW)do _0xX.Visible=(_0xV==_0xR)end end end)end local function _0xY(_0xZ,_0x10,_0x11,_0x12)local _0x13=Instance.new("TextButton")_0x13.Size=UDim2.new(0,200,0,40)_0x13.Position=UDim2.new(0,20,0,_0x11)_0x13.BackgroundColor3=Color3.fromRGB(147,112,219)_0x13.Text=_0x10 _0x13.TextColor3=Color3.fromRGB(255,255,255)_0x13.TextSize=16 _0x13.Font=Enum.Font.FredokaOne _0x13.Parent=_0xZ local _0x14=Instance.new("UICorner")_0x14.CornerRadius=UDim.new(0,5)_0x14.Parent=_0x13 _0x13.MouseButton1Click:Connect(_0x12)return _0x13 end local function _0x15(_0x16,_0x17,_0x18,_0x19)local _0x1A=Instance.new("Frame")_0x1A.Size=UDim2.new(0,200,0,40)_0x1A.Position=UDim2.new(0,20,0,_0x18)_0x1A.BackgroundTransparency=1 _0x1A.Parent=_0x16 local _0x1B=Instance.new("TextLabel")_0x1B.Size=UDim2.new(0,150,1,0)_0x1B.BackgroundTransparency=1 _0x1B.Text=_0x17 _0x1B.TextColor3=Color3.fromRGB(255,255,255)_0x1B.TextSize=16 _0x1B.Font=Enum.Font.FredokaOne _0x1B.TextXAlignment=Enum.TextXAlignment.Left _0x1B.Parent=_0x1A local _0x1C=Instance.new("TextButton")_0x1C.Size=UDim2.new(0,40,0,20)_0x1C.Position=UDim2.new(0,160,0,10)_0x1C.BackgroundColor3=Color3.fromRGB(255,69,0)_0x1C.Text="OFF"_0x1C.TextColor3=Color3.fromRGB(255,255,255)_0x1C.TextSize=14 _0x1C.Font=Enum.Font.FredokaOne _0x1C.Parent=_0x1A local _0x1D=Instance.new("UICorner")_0x1D.CornerRadius=UDim.new(0,5)_0x1D.Parent=_0x1C local _0x1E=false _0x1C.MouseButton1Click:Connect(function()_0x1E=not _0x1E _0x1C.Text=_0x1E and "ON"or "OFF"_0x1C.BackgroundColor3=_0x1E and Color3.fromRGB(0,255,0)or Color3.fromRGB(255,69,0)_0x19(_0x1E)end)return _0x1A end local _0x1F=0 for _0x20,_ in pairs(_0xN)do _0xQ(_0x20,_0x1F)_0x1F=_0x1F+1 end local function _0x21(_0x22)local _0x23=Instance.new("TextLabel")_0x23.Size=UDim2.new(0,200,0,30)_0x23.Position=UDim2.new(1,-220,1,-50)_0x23.BackgroundColor3=Color3.fromRGB(255,140,0)_0x23.Text="_0xJKL012! ".._0x22 _0x23.TextColor3=Color3.fromRGB(255,255,255)_0x23.TextSize=14 _0x23.Font=Enum.Font.FredokaOne _0x23.Parent=_0xC local _0x24=Instance.new("UICorner")_0x24.CornerRadius=UDim.new(0,5)_0x24.Parent=_0x23 wait(3)_0x23:Destroy()end local function _0x25()_0xD.Visible=not _0xD.Visible _0x21(_0xD.Visible and "GUI poppin'! Press K to hide."or "GUI dipped! Press K to show.")end _0xH.MouseButton1Click:Connect(_0x25)local _0x26=false local _0x27=false local _0x28=false local _0x29=false local function _0x2A(_0x2B)_0x26=_0x2B if _0x2.Character then _0x2.Character.Humanoid.WalkSpeed=_0x2B and 100 or 16 end _0x21(_0x2B and "Speed got that _0xJKL012 boost!"or "Speed back to normal, fam!")end local function _0x2C(_0x2D)_0x27=_0x2D _0x21(_0x2D and "Jumpin’ like _0xJKL012!"or "Jumpin’ chilled out!")end local function _0x2E(_0x2F)_0x28=_0x2F if _0x2F and _0x2.Character then local _0x30=Instance.new("BodyVelocity")_0x30.Name="_0xMNO345"_0x30.MaxForce=Vector3.new(math.huge,math.huge,math.huge)_0x30.Velocity=Vector3.new(0,0,0)_0x30.Parent=_0x2.Character.HumanoidRootPart local function _0x31()if _0x28 and _0x2.Character then local _0x32=Vector3.new(0,0,0)if _0x3:IsKeyDown(Enum.KeyCode.W)then _0x32=_0x32+Vector3.new(0,0,-50)end if _0x3:IsKeyDown(Enum.KeyCode.S)then _0x32=_0x32+Vector3.new(0,0,50)end if _0x3:IsKeyDown(Enum.KeyCode.A)then _0x32=_0x32+Vector3.new(-50,0,0)end if _0x3:IsKeyDown(Enum.KeyCode.D)then _0x32=_0x32+Vector3.new(50,0,0)end if _0x3:IsKeyDown(Enum.KeyCode.Space)then _0x32=_0x32+Vector3.new(0,50,0)end if _0x3:IsKeyDown(Enum.KeyCode.LeftControl)then _0x32=_0x32+Vector3.new(0,-50,0)end _0x30.Velocity=_0x2.Character.HumanoidRootPart.CFrame:VectorToWorldSpace(_0x32)end end _0x5:BindToRenderStep("_0xPQR678",Enum.RenderPriority.Input.Value,_0x31)_0x21("Flyin’ with _0xJKL012 vibes!")else if _0x2.Character and _0x2.Character.HumanoidRootPart:FindFirstChild("_0xMNO345")then _0x2.Character.HumanoidRootPart._0xMNO345:Destroy()end _0x5:UnbindFromRenderStep("_0xPQR678")_0x21("Flyin’ turned off, fam!")end end local function _0x33(_0x34)_0x29=_0x34 if _0x34 then local function _0x35()if _0x29 and _0x2.Character then for _,_0x36 in pairs(_0x2.Character:GetDescendants())do if _0x36:IsA("BasePart")then _0x36.CanCollide=false end end end end _0x5:BindToRenderStep("_0xSTU901",Enum.RenderPriority.Character.Value,_0x35)_0x21("Noclip got that _0xJKL012 flow!")else _0x5:UnbindFromRenderStep("_0xSTU901")if _0x2.Character then for _,_0x37 in pairs(_0x2.Character:GetDescendants())do if _0x37:IsA("BasePart")then _0x37.CanCollide=true end end end _0x21("Noclip off, fam!")end end local function _0x38()local _0x39=_0x1:GetPlayers()local _0x3A=_0x39[math.random(1,#_0x39)]if _0x3A~=_0x2 and _0x3A.Character then _0x2.Character.HumanoidRootPart.CFrame=_0x3A.Character.HumanoidRootPart.CFrame _0x21("AYO, teleported to ".._0x3A.Name.."!")else _0x21("No one to teleport to, fam!")end end _0xN._0xO1._0x3B=_0x15(_0xM,"AYO Speed",20,_0x2A)_0xN._0xO1._0x3C=_0x15(_0xM,"Infinite Jump",70,_0x2C)_0xN._0xO1._0x3D=_0x15(_0xM,"AYO Fly",120,_0x2E)_0xN._0xO1._0x3E=_0x15(_0xM,"Noclip",170,_0x33)_0xN._0xO1._0x3F=_0xY(_0xM,"Teleport to Randos",220,_0x38)local _0x40=false local _0x41=false local _0x42=false local function _0x43(_0x44)_0x40=_0x44 if _0x44 then local function _0x45()if _0x40 and _0x2.Character then for _,_0x46 in pairs(_0x1:GetPlayers())do if _0x46~=_0x2 and _0x46.Character and _0x46.Character.HumanoidRootPart then local _0x47=(_0x46.Character.HumanoidRootPart.Position-_0x2.Character.HumanoidRootPart.Position).Magnitude if _0x47<15 then _0x46.Character.Humanoid:TakeDamage(10)end end end end end _0x5:BindToRenderStep("_0xVWX234",Enum.RenderPriority.Character.Value,_0x45)_0x21("Kill aura lit, fam!")else _0x5:UnbindFromRenderStep("_0xVWX234")_0x21("Kill aura chilled out!")end end local function _0x48(_0x49)_0x41=_0x49 if _0x49 and _0x2.Character then _0x2.Character.Humanoid.MaxHealth=math.huge _0x2.Character.Humanoid.Health=math.huge _0x21("God mode got that AYO glow!")else if _0x2.Character then _0x2.Character.Humanoid.MaxHealth=100 _0x2.Character.Humanoid.Health=100 end _0x21("God mode off, fam!")end end local function _0x4A(_0x4B)_0x42=_0x4B if _0x4B then local function _0x4C()if _0x42 and _0x2.Character then for _,_0x4D in pairs(_0x1:GetPlayers())do if _0x4D~=_0x2 and _0x4D.Character and _0x4D.Character.Humanoid then _0x4D.Character.Humanoid:TakeDamage(5)end end end end _0x5:BindToRenderStep("_0xYZA567",Enum.RenderPriority.Character.Value,_0x4C)_0x21("Auto-hit is poppin’!")else _0x5:UnbindFromRenderStep("_0xYZA567")_0x21("Auto-hit chilled out!")end end local function _0x4E()for _,_0x4F in pairs(_0x1:GetPlayers())do if _0x4F~=_0x2 and _0x4F.Character then _0x4F.Character.Humanoid.Health=0 end end _0x21("AYO, wiped ‘em all!")end _0xN._0xO2._0x50=_0x15(_0xM,"Kill Aura",20,_0x43)_0xN._0xO2._0x51=_0x15(_0xM,"God Mode",70,_0x48)_0xN._0xO2._0x52=_0x15(_0xM,"Auto Hit",120,_0x4A)_0xN._0xO2._0x53=_0xY(_0xM,"Wipe Everyone",170,_0x4E)local _0x54=false local _0x55=false local _0x56=false local function _0x57()for _0x58=1,10 do _0xA.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("_0xJKL012, THIS SERVER IS LIT! 🔥","All")wait(0.5)end _0x21("Chat spammed, fam!")end local function _0x59()for _,_0x5A in pairs(_0x1:GetPlayers())do if _0x5A.Character and _0x5A.Character.HumanoidRootPart then local _0x5B=Instance.new("Sparkles")_0x5B.SparkleColor=Color3.fromRGB(255,69,0)_0x5B.Parent=_0x5A.Character.HumanoidRootPart game:GetService("Debris"):AddItem(_0x5B,5)end end _0x21("AYO, sparkles on fleek!")end local function _0x5C()for _0x5D=1,5 do local _0x5E=Instance.new("Sound")_0x5E.SoundId="rbxassetid://1839246711"_0x5E.Volume=10 _0x5E.Parent=_0x7 _0x5E:Play()game:GetService("Debris"):AddItem(_0x5E,3)wait(1)end _0x21("Sound spam got that AYO energy!")end local function _0x5F()for _0x60=1,100 do local _0x61=Instance.new("Part")_0x61.Size=Vector3.new(1000,1000,1000)_0x61.Position=Vector3.new(math.random(-1000,1000),math.random(-1000,1000),math.random(-1000,1000))_0x61.Parent=_0x7 game:GetService("Debris"):AddItem(_0x61,1)end _0x21("AYO, server crash attempt! Stay lit!")end local function _0x62()for _,_0x63 in pairs(_0x1:GetPlayers())do _0xA.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(_0x63.Name.." got 9999999 points! AYO!","All")end _0x21("Fake leaderboard poppin’!")end local function _0x64()if _0x2.Character then local _0x65=Instance.new("Explosion")_0x65.Position=_0x2.Character.HumanoidRootPart.Position _0x65.BlastRadius=10 _0x65.BlastPressure=0 _0x65.Parent=_0x7 _0x2.Character.Humanoid.Health=0 end _0x21("AYO, faked your death!")end local function _0x66()for _,_0x67 in pairs(_0x1:GetPlayers())do if _0x67.Character then local _0x68=_0x67.Character:FindFirstChild("Humanoid")if _0x68 then _0x68.CameraOffset=Vector3.new(math.random(-1,1),math.random(-1,1),0)wait(0.1)_0x68.CameraOffset=Vector3.new(0,0,0)end end end _0x21("Screen shake got that AYO vibe!")end _0xN._0xO3._0x69=_0xY(_0xM,"Spam Chat",20,_0x57)_0xN._0xO3._0x6A=_0xY(_0xM,"Fire Sparkles",70,_0x59)_0xN._0xO3._0x6B=_0xY(_0xM,"Hype Sounds",120,_0x5C)_0xN._0xO3._0x6C=_0xY(_0xM,"Lag Server",170,_0x5F)_0xN._0xO3._0x6D=_0xY(_0xM,"Fake Leaderboard",220,_0x62)_0xN._0xO3._0x6E=_0xY(_0xM,"Fake Death",270,_0x64)_0xN._0xO3._0x6F=_0xY(_0xM,"Screen Shake",320,_0x66)local _0x70=false local _0x71=false local _0x72=false local function _0x73(_0x74)if _0x74~=_0x2 and _0x74.Character then local _0x75=Instance.new("Highlight")_0x75.FillColor=Color3.fromRGB(255,69,0)_0x75.OutlineColor=Color3.fromRGB(255,255,0)_0x75.Parent=_0x74.Character _0x75.Adornee=_0x74.Character _0x75.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop end end local function _0x76(_0x77)_0x70=_0x77 if _0x77 then for _,_0x78 in pairs(_0x1:GetPlayers())do _0x73(_0x78)end _0x1.PlayerAdded:Connect(function(_0x79)_0x79.CharacterAdded:Connect(function()if _0x70 then _0x73(_0x79)end end)end)_0x21("ESP got that AYO glow!")else for _,_0x7A in pairs(_0x1:GetPlayers())do if _0x7A.Character and _0x7A.Character:FindFirstChildOfClass("Highlight")then _0x7A.Character.Highlight:Destroy()end end _0x21("ESP turned off, fam!")end end local function _0x7B(_0x7C)_0x71=_0x7C if _0x7C then local function _0x7D()for _,_0x7E in pairs(_0x1:GetPlayers())do if _0x7E~=_0x2 and _0x7E.Character and _0x7E.Character.HumanoidRootPart then local _0x7F=Instance.new("Beam")_0x7F.Color=ColorSequence.new(Color3.fromRGB(255,69,0))_0x7F.Width0=0.2 _0x7F.Width1=0.2 _0x7F.Parent=_0x7 local _0x80=Instance.new("Attachment")_0x80.Parent=_0x2.Character.HumanoidRootPart local _0x81=Instance.new("Attachment")_0x81.Parent=_0x7E.Character.HumanoidRootPart _0x7F.Attachment0=_0x80 _0x7F.Attachment1=_0x81 game:GetService("Debris"):AddItem(_0x7F,0.1)end end end _0x5:BindToRenderStep("_0xBCD890",Enum.RenderPriority.Camera.Value,_0x7D)_0x21("Tracers on fleek!")else _0x5:UnbindFromRenderStep("_0xBCD890")_0x21("Tracers off, fam!")end end local function _0x82(_0x83)_0x72=_0x83 if _0x83 then _0x8.Brightness=2 _0x8.GlobalShadows=false _0x8.FogEnd=100000 _0x21("Fullbright lit up, AYO!")else _0x8.Brightness=1 _0x8.GlobalShadows=true _0x8.FogEnd=1000 _0x21("Fullbright off, fam!")end end local function _0x84()local _0x85=Instance.new("PointLight")_0x85.Brightness=2 _0x85.Range=50 _0x85.Color=Color3.fromRGB(255,255,0)_0x85.Parent=_0x2.Character.HumanoidRootPart _0x21("Night vision got that AYO shine!")end local function _0x86()local _0x87=Instance.new("Sky")_0x87.SkyboxBk="http://www.roblox.com/asset/?id=1012890"_0x87.SkyboxDn="http://www.roblox.com/asset/?id=1012890"_0x87.SkyboxFt="http://www.roblox.com/asset/?id=1012890"_0x87.SkyboxLf="http://www.roblox.com/asset/?id=1012890"_0x87.SkyboxRt="http://www.roblox.com/asset/?id=1012890"_0x87.SkyboxUp="http://www.roblox.com/asset/?id=1012890"_0x87.Parent=_0x8 _0x21("Skybox got that AYO fire!")end _0xN._0xO4._0x88=_0x15(_0xM,"Player ESP",20,_0x76)_0xN._0xO4._0x89=_0x15(_0xM,"Tracers",70,_0x7B)_0xN._0xO4._0x8A=_0x15(_0xM,"Fullbright",120,_0x82)_0xN._0xO4._0x8B=_0xY(_0xM,"Night Vision",170,_0x84)_0xN._0xO4._0x8C=_0xY(_0xM,"Fire Skybox",220,_0x86)local _0x8D=false local _0x8E=false local function _0x8F(_0x90)_0x8D=_0x90 if _0x90 then local function _0x91()if _0x8D then for _,_0x92 in pairs(_0x7:GetDescendants())do if _0x92:IsA("BasePart")and _0x92.Name=="Collectible"then _0x2.Character.HumanoidRootPart.CFrame=_0x92.CFrame wait(0.1)end end end end _0x5:BindToRenderStep("_0xEFG123",Enum.RenderPriority.Character.Value,_0x91)_0x21("Auto-farm poppin’ off!")else _0x5:UnbindFromRenderStep("_0xEFG123")_0x21("Auto-farm off, fam!")end end local function _0x93(_0x94)_0x8E=_0x94 if _0x94 then local _0x95=game:GetService("VirtualUser")local function _0x96()if _0x8E then _0x95:ClickButton1(Vector2.new(500,500))end end _0x5:BindToRenderStep("_0xHIJ456",Enum.RenderPriority.Input.Value,_0x96)_0x21("Auto-click got that AYO grind!")else _0x5:UnbindFromRenderStep("_0xHIJ456")_0x21("Auto-click off, fam!")end end _0xN._0xO5._0x97=_0x15(_0xM,"Auto-Farm",20,_0x8F)_0xN._0xO5._0x98=_0x15(_0xM,"Auto-Click",70,_0x93)local function _0x99()local _0x9A=Color3.fromRGB(math.random(0,255),math.random(0,255),math.random(0,255))_0xD.BackgroundColor3=_0x9A _0x21("GUI color switched up, AYO!")end local function _0x9B()_0x2.Character:BreakJoints()_0x21("Character reset, fam!")end local function _0x9C()loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()_0x21("Infinite Yield loaded, AYO!")end local function _0x9D()_0xG.Font=Enum.Font.Arcade _0x21("Font switched to Arcade, fam!")end local function _0x9E()_0xD.BackgroundTransparency=0.3 _0x21("GUI transparency set to 30%, AYO!")end local function _0x9F()_0xD.BackgroundTransparency=0 _0x21("GUI transparency reset, fam!")end _0xN._0xO6._0xA0=_0xY(_0xM,"Random Color",20,_0x99)_0xN._0xO6._0xA1=_0xY(_0xM,"Reset Character",70,_0x9B)_0xN._0xO6._0xA2=_0xY(_0xM,"Load Infinite Yield",120,_0x9C)_0xN._0xO6._0xA3=_0xY(_0xM,"Switch Font",170,_0x9D)_0xN._0xO6._0xA4=_0xY(_0xM,"Set Transparency",220,_0x9E)_0xN._0xO6._0xA5=_0xY(_0xM,"Reset Transparency",270,_0x9F)local _0xA6=false local _0xA7=false local _0xA8=false local function _0xA9(_0xAA)_0xA6=_0xAA _0x7.Gravity=_0xAA and 50 or 196.2 _0x21(_0xAA and "Low gravity got that AYO bounce!"or "Gravity back to normal, fam!")end local function _0xAB(_0xAC)_0xA7=_0xAC _0x8.TimeOfDay=_0xAC and "00:00:00"or "14:00:00"_0x21(_0xAC and "Midnight mode, AYO!"or "Daytime back, fam!")end local function _0xAD()local _0xAE=Instance.new("ColorCorrectionEffect")_0xAE.Brightness=1 _0xAE.Parent=_0x8 wait(0.2)_0xAE.Brightness=0 game:GetService("Debris"):AddItem(_0xAE,1)_0x21("Screen flashed, AYO!")end local function _0xAF()local _0xB0=_0x2.Character.HumanoidRootPart.Position for _,_0xB1 in pairs(_0x1:GetPlayers())do if _0xB1~=_0x2 and _0xB1.Character then _0xB1.Character.HumanoidRootPart.CFrame=CFrame.new(_0xB0+Vector3.new(math.random(-10,10),0,math.random(-10,10)))end end _0x21("Mass teleported, AYO!")end local function _0xB2()for _,_0xB3 in pairs(_0x1:GetPlayers())do if _0xB3.Character and _0xB3.Character.HumanoidRootPart then local _0xB4=Instance.new("Explosion")_0xB4.Position=_0xB3.Character.HumanoidRootPart.Position _0xB4.BlastRadius=10 _0xB4.BlastPressure=0 _0xB4.Parent=_0x7 end end _0x21("Fake explosion poppin’ off!")end _0xN._0xO7._0xB5=_0x15(_0xM,"Low Gravity",20,_0xA9)_0xN._0xO7._0xB6=_0x15(_0xM,"Midnight Mode",70,_0xAB)_0xN._0xO7._0xB7=_0xY(_0xM,"Screen Flash",120,_0xAD)_0xN._0xO7._0xB8=_0xY(_0xM,"Mass Teleport",170,_0xAF)_0xN._0xO7._0xB9=_0xY(_0xM,"Fake Explosion",220,_0xB2)local _0xBA=false local _0xBB=false local function _0xBC()if _0x2.Character then _0x2.Character.HumanoidRootPart.CFrame=CFrame.new(Vector3.new(math.random(-500,500),100,math.random(-500,500)))end _0x21("AYO, random teleport!")end local function _0xBD(_0xBE)_0xBA=_0xBE if _0xBE and _0x2.Character then local _0xBF=Instance.new("BodyAngularVelocity")_0xBF.Name="_0xKLM789"_0xBF.MaxTorque=Vector3.new(0,math.huge,0)_0xBF.AngularVelocity=Vector3.new(0,10,0)_0xBF.Parent=_0x2.Character.HumanoidRootPart _0x21("Spinnin’ with AYO energy!")else if _0x2.Character and _0x2.Character.HumanoidRootPart:FindFirstChild("_0xKLM789")then _0x2.Character.HumanoidRootPart._0xKLM789:Destroy()end _0x21("Spinnin’ off, fam!")end end local function _0xC0()if _0x2.Character then for _,_0xC1 in pairs(_0x2.Character:GetDescendants())do if _0xC1:IsA("BasePart")then _0xC1.Size=_0xC1.Size*1.5 end end end _0x21("AYO, you’re huge now!")end local function _0xC2()if _0x2.Character then for _,_0xC3 in pairs(_0x2.Character:GetDescendants())do if _0xC3:IsA("BasePart")then _0xC3.Size=_0xC3.Size/1.5 end end end _0x21("AYO, you’re tiny now!")end local function _0xC4()local function _0xC5()while true do if _0x2.Character then for _,_0xC6 in pairs(_0x2.Character:GetDescendants())do if _0xC6:IsA("BasePart")then _0xC6.BrickColor=BrickColor.new(Color3.fromRGB(math.random(0,255),math.random(0,255),math.random(0,255)))end end end wait(0.1)end end coroutine.wrap(_0xC5)()_0x21("Rainbow vibes, AYO!")end local function _0xC7()if _0x2.Character then _0x2.Character.Humanoid.JumpPower=100 end _0x21("Super jump got that AYO bounce!")end local function _0xC8()if _0x2.Character then _0x2.Character.Humanoid.JumpPower=50 end _0x21("Jump power reset, fam!")end local function _0xC9()if _0x2.Character then local _0xCA=_0x2.Character:FindFirstChild("Humanoid")if _0xCA then local _0xCB=Instance.new("Animation")_0xCB.AnimationId="rbxassetid://507771019"local _0xCC=_0xCA:LoadAnimation(_0xCB)_0xCC:Play()end end _0x21("AYO, bustin’ a move!")end local function _0xCD()if _0x2.Character and _0x2.Character.HumanoidRootPart then local _0xCE=Instance.new("Fire")_0xCE.Color=Color3.fromRGB(255,69,0)_0xCE.SecondaryColor=Color3.fromRGB(255,255,0)_0xCE.Size=10 _0xCE.Parent=_0x2.Character.HumanoidRootPart game:GetService("Debris"):AddItem(_0xCE,10)end _0x21("AYO, you’re on fire!")end _0xN._0xO8._0xCF=_0xY(_0xM,"Random Teleport",20,_0xBC)_0xN._0xO8._0xD0=_0x15(_0xM,"Spin Mode",70,_0xBD)_0xN._0xO8._0xD1=_0xY(_0xM,"Get Big",120,_0xC0)_0xN._0xO8._0xD2=_0xY(_0xM,"Get Small",170,_0xC2)_0xN._0xO8._0xD3=_0xY(_0xM,"Rainbow Vibes",220,_0xC4)_0xN._0xO8._0xD4=_0xY(_0xM,"Super Jump",270,_0xC7)_0xN._0xO8._0xD5=_0xY(_0xM,"Reset Jump",320,_0xC8)_0xN._0xO8._0xD6=_0xY(_0xM,"Hype Dance",370,_0xC9)_0xN._0xO8._0xD7=_0xY(_0xM,"Fire Aura",420,_0xCD)_0x3.InputBegan:Connect(function(_0xD8,_0xD9)if not _0xD9 then if _0x27 and _0xD8.KeyCode==Enum.KeyCode.Space then if _0x2.Character and _0x2.Character.Humanoid then _0x2.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)end end if _0xD8.KeyCode==Enum.KeyCode.K then _0x25()end end end)local _0xDA=TweenInfo.new(0.5,Enum.EasingStyle.Sine,Enum.EasingDirection.Out)local _0xDB=_0x4:Create(_0xD,_0xDA,{Size=UDim2.new(0,600,0,400)})local _0xDC=_0x4:Create(_0xD,_0xDA,{Size=UDim2.new(0,0,0,0)})_0xD.Size=UDim2.new(0,0,0,0)_0xDB:Play()local function _0xDD()while true do for _0xDE=0,255,5 do _0xE.Color=Color3.fromRGB(255,165-_0xDE,_0xDE)wait(0.05)end for _0xDF=255,0,-5 do _0xE.Color=Color3.fromRGB(255,165-_0xDF,_0xDF)wait(0.05)end end end coroutine.wrap(_0xDD)()local _0xE0=game:GetService("VirtualUser")_0x2.Idled:Connect(function()_0xE0:CaptureController()_0xE0:ClickButton2(Vector2.new())_0x21("Anti-AFK triggered, AYO!")end)local function _0xE1()for _,_0xE2 in pairs(_0x1:GetPlayers())do if _0xE2.Character then local _0xE3="Player: ".._0xE2.Name.."\nHealth: ".._0xE2.Character.Humanoid.Health _0x21(_0xE3)end end end _0xN._0xO6._0xE4=_0xY(_0xM,"Show Stats",320,_0xE1)_0xM.CanvasSize=UDim2.new(0,0,0,800)_0x21("AYO Ultra GUI Loaded! Press K to toggle or use the X button.")local function _0xE5()local _0xE6,_0xE7=pcall(function()local _0xE8=game:GetService("ThirdPartyUserService")print("ThirdPartyUserService is accessible:",_0xE8)end)if not _0xE6 then _0x21("Avoided ThirdPartyUserService conflict, fam!")end end _0xE5()
+-- _0xNOP789
+-- _0xQRS012
+-- _0xTUV345
+-- _0xWXY678
+-- _0xZAB901
+-- _0xCDE234
+-- _0xFGH567
+-- _0xIJK890
+-- _0xLMN123
+-- _0xOPQ456
+-- _0xRST789
+-- _0xUVW012
+-- _0xXYZ345
+-- _0xABC678
+-- _0xDEF901
+-- _0xGHI234
+-- _0xJKL567
+-- _0xMNO890
+-- _0xPQR123
+-- _0xSTU456
+-- _0xVWX789
+-- _0xYZA012
+-- _0xBCD345
+-- _0xEFG678
+-- _0xHIJ901
+-- _0xKLM234
+-- _0xNOP567
+-- _0xQRS890
+-- _0xTUV123
+-- _0xWXY456
+-- _0xZAB789
+-- _0xCDE012
+-- _0xFGH345
+-- _0xIJK678
+-- _0xLMN901
+-- _0xOPQ234
+-- _0xRST567
+-- _0xUVW890
+-- _0xXYZ123
+-- _0xABC456
+-- _0xDEF789
+-- _0xGHI012
+-- _0xJKL345
+-- _0xMNO678
+-- _0xPQR901
+-- _0xSTU234
+-- _0xVWX567
+-- _0xYZA890
+-- _0xBCD123
+-- _0xEFG456
+-- _0xHIJ789
+-- _0xKLM012
+-- _0xNOP345
+-- _0xQRS678
+-- _0xTUV901
+-- _0xWXY234
+-- _0xZAB567
+-- _0xCDE890
+-- _0xFGH123
+-- _0xIJK456
+-- _0xLMN789
+-- _0xOPQ012
+-- _0xRST345
+-- _0xUVW678
+-- _0xXYZ901
+-- _0xABC234
+-- _0xDEF567
+-- _0xGHI890
+-- _0xJKL123
+-- _0xMNO456
+-- _0xPQR789
+-- _0xSTU012
+-- _0xVWX345
+-- _0xYZA678
+-- _0xBCD901
+-- _0xEFG234
+-- _0xHIJ567
+-- _0xKLM890
+-- _0xNOP123
+-- _0xQRS456
+-- _0xTUV789
+-- _0xWXY012
+-- _0xZAB345
+-- _0xCDE678
+-- _0xFGH901
+-- _0xIJK234
+-- _0xLMN567
+-- _0xOPQ890
+-- _0xRST123
+-- _0xUVW456
+-- _0xXYZ789
+-- _0xABC012
+-- _0xDEF345
+-- _0xGHI678
+-- _0xJKL901
+-- _0xMNO234
+-- _0xPQR567
+-- _0xSTU890
+-- _0xVWX123
+-- _0xYZA456
+-- _0xBCD789
+-- _0xEFG012
+-- _0xHIJ345
+-- _0xKLM678
+-- _0xNOP901
+-- _0xQRS234
+-- _0xTUV567
+-- _0xWXY890
+-- _0xZAB123
+-- _0xCDE456
+-- _0xFGH789
+-- _0xIJK012
+-- _0xLMN345
+-- _0xOPQ678
+-- _0xRST901
+-- _0xUVW234
+-- _0xXYZ567
+-- _0xABC890
+-- _0xDEF123
+-- _0xGHI456
+-- _0xJKL789
+-- _0xMNO012
+-- _0xPQR345
+-- _0xSTU678
+-- _0xVWX901
+-- _0xYZA234
+-- _0xBCD567
+-- _0xEFG890
+-- _0xHIJ123
+-- _0xKLM456
+-- _0xNOP789
+-- _0xQRS012
+-- _0xTUV345
+-- _0xWXY678
+-- _0xZAB901
+-- _0xCDE234
+-- _0xFGH567
+-- _0xIJK890
+-- _0xLMN123
+-- _0xOPQ456
+-- _0xRST789
+-- _0xUVW012
+-- _0xXYZ345
+-- _0xABC678
+-- _0xDEF901
+-- _0xGHI234
+-- _0xJKL567
+-- _0xMNO890
+-- _0xPQR123
+-- _0xSTU456
+-- _0xVWX789
+-- _0xYZA012
+-- _0xBCD345
+-- _0xEFG678
+-- _0xHIJ901
+-- _0xKLM234
+-- _0xNOP567
+-- _0xQRS890
+-- _0xTUV123
+-- _0xWXY456
+-- _0xZAB789
+-- _0xCDE012
+-- _0xFGH345
+-- _0xIJK678
+-- _0xLMN901
+-- _0xOPQ234
+-- _0xRST567
+-- _0xUVW890
+-- _0xXYZ123
+-- _0xABC456
+-- _0xDEF789
+-- _0xGHI012
+-- _0xJKL345
+-- _0xMNO678
+-- _0xPQR901
+-- _0xSTU234
+-- _0xVWX567
+-- _0xYZA890
+-- _0xBCD123
+-- _0xEFG456
+-- _0xHIJ789
+-- _0xKLM012
+-- _0xNOP345
+-- _0xQRS678
+-- _0xTUV901
+-- _0xWXY234
+-- _0xZAB567
+-- _0xCDE890
+-- _0xFGH123
+-- _0xIJK456
+-- _0xLMN789
+-- _0xOPQ012
+-- _0xRST345
+-- _0xUVW678
+-- _0xXYZ901
+-- _0xABC234
+-- _0xDEF567
+-- _0xGHI890
+-- _0xJKL123
+-- _0xMNO456
+-- _0xPQR789
+-- _0xSTU012
+-- _0xVWX345
+-- _0xYZA678
+-- _0xBCD901
+-- _0xEFG234
+-- _0xHIJ567
+-- _0xKLM890
+-- _0xNOP123
+-- _0xQRS456
+-- _0xTUV789
+-- _0xWXY012
+-- _0xZAB345
+-- _0xCDE678
+-- _0xFGH901
+-- _0xIJK234
+-- _0xLMN567
+-- _0xOPQ890
+-- _0xRST123
+-- _0xUVW456
+-- _0xXYZ789
+-- _0xABC012
+-- _0xDEF345
+-- _0xGHI678
+-- _0xJKL901
+-- _0xMNO234
+-- _0xPQR567
+-- _0xSTU890
+-- _0xVWX123
+-- _0xYZA456
+-- _0xBCD789
+-- _0xEFG012
+-- _0xHIJ345
+-- _0xKLM678
+-- _0xNOP901
+-- _0xQRS234
+-- _0xTUV567
+-- _0xWXY890
+-- _0xZAB123
+-- _0xCDE456
+-- _0xFGH789
+-- _0xIJK012
+-- _0xLMN345
+-- _0xOPQ678
+-- _0xRST901
+-- _0xUVW234
+-- _0xXYZ567
+-- _0xABC890
+-- _0xDEF123
+-- _0xGHI456
+-- _0xJKL789
+-- _0xMNO012
+-- _0xPQR345
+-- _0xSTU678
+-- _0xVWX901
+-- _0xYZA234
+-- _0xBCD567
+-- _0xEFG890
+-- _0xHIJ123
+-- _0xKLM456
+-- _0xNOP789
+-- _0xQRS012
+-- _0xTUV345
+-- _0xWXY678
+-- _0xZAB901
+-- _0xCDE234
+-- _0xFGH567
+-- _0xIJK890
+-- _0xLMN123
+-- _0xOPQ456
+-- _0xRST789
+-- _0xUVW012
+-- _0xXYZ345
+-- _0xABC678
+-- _0xDEF901
+-- _0xGHI234
+-- _0xJKL567
+-- _0xMNO890
+-- _0xPQR123
+-- _0xSTU456
+-- _0xVWX789
+-- _0xYZA012
+-- _0xBCD345
+-- _0xEFG678
+-- _0xHIJ901
+-- _0xKLM234
+-- _0xNOP567
+-- _0xQRS890
+-- _0xTUV123
+-- _0xWXY456
+-- _0xZAB789
+-- _0xCDE012
+-- _0xFGH345
+-- _0xIJK678
+-- _0xLMN901
+-- _0xOPQ234
+-- _0xRST567
+-- _0xUVW890
+-- _0xXYZ123
+-- _0xABC456
+-- _0xDEF789
+-- _0xGHI012
+-- _0xJKL345
+-- _0xMNO678
+-- _0xPQR901
+-- _0xSTU234
+-- _0xVWX567
+-- _0xYZA890
+-- _0xBCD123
+-- _0xEFG456
+-- _0xHIJ789
+-- _0xKLM012
+-- _0xNOP345
+-- _0xQRS678
+-- _0xTUV901
+-- _0xWXY234
+-- _0xZAB567
+-- _0xCDE890
+-- _0xFGH123
+-- _0xIJK456
+-- _0xLMN789
+-- _0xOPQ012
+-- _0xRST345
+-- _0xUVW678
+-- _0xXYZ901
+-- _0xABC234
+-- _0xDEF567
+-- _0xGHI890
+-- _0xJKL123
+-- _0xMNO456
+-- _0xPQR789
+-- _0xSTU012
+-- _0xVWX345
+-- _0xYZA678
+-- _0xBCD901
+-- _0xEFG234
+-- _0xHIJ567
+-- _0xKLM890
+-- _0xNOP123
+-- _0xQRS456
+-- _0xTUV789
+-- _0xWXY012
+-- _0xZAB345
+-- _0xCDE678
+-- _0xFGH901
+-- _0xIJK234
+-- _0xLMN567
+-- _0xOPQ890
+-- _0xRST123
+-- _0xUVW456
+-- _0xXYZ789
+-- _0xABC012
+-- _0xDEF345
+-- _0xGHI678
+-- _0xJKL901
+-- _0xMNO234
+-- _0xPQR567
+-- _0xSTU890
+-- _0xVWX123
+-- _0xYZA456
+-- _0xBCD789
+-- _0xEFG012
+-- _0xHIJ345
+-- _0xKLM678
+-- _0xNOP901
+-- _0xQRS234
+-- _0xTUV567
+-- _0xWXY890
+-- _0xZAB123
+-- _0xCDE456
+-- _0xFGH789
+-- _0xIJK012
+-- _0xLMN345
+-- _0xOPQ678
+-- _0xRST901
+-- _0xUVW234
+-- _0xXYZ567
+-- _0xABC890
+-- _0xDEF123
+-- _0xGHI456
+-- _0xJKL789
+-- _0xMNO012
+-- _0xPQR345
+-- _0xSTU678
+-- _0xVWX901
+-- _0xYZA234
+-- _0xBCD567
+-- _0xEFG890
+-- _0xHIJ123
+-- _0xKLM456
+-- _0xNOP789
+-- _0xQRS012
+-- _0xTUV345
+-- _0xWXY678
+-- _0xZAB901
+-- _0xCDE234
+-- _0xFGH567
+-- _0xIJK890
+-- _0xLMN123
+-- _0xOPQ456
+-- _0xRST789
+-- _0xUVW012
+-- _0xXYZ345
+-- _0xABC678
+-- _0xDEF901
+-- _0xGHI234
+-- _0xJKL567
+-- _0xMNO890
+-- _0xPQR123
+-- _0xSTU456
+-- _0xVWX789
+-- _0xYZA012
+-- _0xBCD345
+-- _0xEFG678
+-- _0xHIJ901
+-- _0xKLM234
+-- _0xNOP567
+-- _0xQRS890
+-- _0xTUV123
+-- _0xWXY456
+-- _0xZAB789
+-- _0xCDE012
+-- _0xFGH345
+-- _0xIJK678
+-- _0xLMN901
+-- _0xOPQ234
+-- _0xRST567
+-- _0xUVW890
+-- _0xXYZ123
+-- _0xABC456
+-- _0xDEF789
+-- _0xGHI012
+-- _0xJKL345
+-- _0xMNO678
+-- _0xPQR901
+-- _0xSTU234
+-- _0xVWX567
+-- _0xYZA890
+-- _0xBCD123
+-- _0xEFG456
+-- _0xHIJ789
+-- _0xKLM012
+-- _0xNOP345
+-- _0xQRS678
+-- _0xTUV901
+-- _0xWXY234
+-- _0xZAB567
+-- _0xCDE890
+-- _0xFGH123
+-- _0xIJK456
+-- _0xLMN789
+-- _0xOPQ012
+-- _0xRST345
+-- _0xUVW678
+-- _0xXYZ901
+-- _0xABC234
+-- _0xDEF567
+-- _0xGHI890
+-- _0xJKL123
+-- _0xMNO456
+-- _0xPQR789
+-- _0xSTU012
+-- _0xVWX345
+-- _0xYZA678
+-- _0xBCD901
+-- _0xEFG234
+-- _0xHIJ567
+-- _0xKLM890
+-- _0xNOP123
+-- _0xQRS456
+-- _0xTUV789
+-- _0xWXY012
+-- _0xZAB345
+-- _0xCDE678
+-- _0xFGH901
+-- _0xIJK234
+-- _0xLMN567
+-- _0xOPQ890
+-- _0xRST123
+-- _0xUVW456
+-- _0xXYZ789
+-- _0xABC012
+-- _0xDEF345
+-- _0xGHI678
+-- _0xJKL901
+-- _0xMNO234
+-- _0xPQR567
+-- _0xSTU890
+-- _0xVWX123
+-- _0xYZA456
+-- _0xBCD789
+-- _0xEFG012
+-- _0xHIJ345
+-- _0xKLM678
+-- _0xNOP901
+-- _0xQRS234
+-- _0xTUV567
+-- _0xWXY890
+-- _0xZAB123
+-- _0xCDE456
+-- _0xFGH789
+-- _0xIJK012
+-- _0xLMN345
+-- _0xOPQ678
+-- _0xRST901
+-- _0xUVW234
+-- _0xXYZ567
+-- _0xABC890
+-- _0xDEF123
+-- _0xGHI456
+-- _0xJKL789
+-- _0xMNO012
+-- _0xPQR345
+-- _0xSTU678
+-- _0xVWX901
+-- _0xYZA234
+-- _0xBCD567
+-- _0xEFG890
+-- _0xHIJ123
+-- _0xKLM456
+-- _0xNOP789
+-- _0xQRS012
+-- _0xTUV345
+-- _0xWXY678
+-- _0xZAB901
+-- _0xCDE234
+-- _0xFGH567
+-- _0xIJK890
+-- _0xLMN123
+-- _0xOPQ456
+-- _0xRST789
+-- _0xUVW012
+-- _0xXYZ345
+-- _0xABC678
+-- _0xDEF901
+-- _0xGHI234
+-- _0xJKL567
+-- _0xMNO890
+-- _0xPQR123
+-- _0xSTU456
+-- _0xVWX789
+-- _0xYZA012
+-- _0xBCD345
+-- _0xEFG678
+-- _0xHIJ901
+-- _0xKLM234
+-- _0xNOP567
+-- _0xQRS890
+-- _0xTUV123
+-- _0xWXY456
+-- _0xZAB789
+-- _0xCDE012
+-- _0xFGH345
+-- _0xIJK678
+-- _0xLMN901
+-- _0xOPQ234
+-- _0xRST567
+-- _0xUVW890
+-- _0xXYZ123
+-- _0xABC456
+-- _0xDEF789
+-- _0xGHI012
+-- _0xJKL345
+-- _0xMNO678
+-- _0xPQR901
+-- _0xSTU234
+-- _0xVWX567
+-- _0xYZA890
+-- _0xBCD123
+-- _0xEFG456
+-- _0xHIJ789
+-- _0xKLM012
+-- _0xNOP345
+-- _0xQRS678
+-- _0xTUV901
+-- _0xWXY234
+-- _0xZAB567
+-- _0xCDE890
+-- _0xFGH123
+-- _0xIJK456
+-- _0xLMN789
+-- _0xOPQ012
+-- _0xRST345
+-- _0xUVW678
+-- _0xXYZ901
+-- _0xABC234
+-- _0xDEF567
+-- _0xGHI890
+-- _0xJKL123
+-- _0xMNO456
+-- _0xPQR789
+-- _0xSTU012
+-- _0xVWX345
+-- _0xYZA678
+-- _0xBCD901
+-- _0xEFG234
+-- _0xHIJ567
+-- _0xKLM890
+-- _0xNOP123
+-- _0xQRS456
+-- _0xTUV789
+-- _0xWXY012
+-- _0xZAB345
+-- _0xCDE678
+-- _0xFGH901
+-- _0xIJK234
+-- _0xLMN567
+-- _0xOPQ890
+-- _0xRST123
+-- _0xUVW456
+-- _0xXYZ789
+-- _0xABC012
+-- _0xDEF345
+-- _0xGHI678
+-- _0xJKL901
+-- _0xMNO234
+-- _0xPQR567
+-- _0xSTU890
+-- _0xVWX123
+-- _0xYZA456
+-- _0xBCD789
+-- _0xEFG012
+-- _0xHIJ345
+-- _0xKLM678
+-- _0xNOP901
+-- _0xQRS234
+-- _0xTUV567
+-- _0xWXY890
+-- _0xZAB123
+-- _0xCDE456
+-- _0xFGH789
+-- _0xIJK012
+-- _0xLMN345
+-- _0xOPQ678
+-- _0xRST901
+-- _0xUVW234
+-- _0xXYZ567
+-- _0xABC890
+-- _0xDEF123
+-- _0xGHI456
+-- _0xJKL789
+-- _0xMNO012
+-- _0xPQR345
+-- _0xSTU678
+-- _0xVWX901
+-- _0xYZA234
+-- _0xBCD567
+-- _0xEFG890
+-- _0xHIJ123
+-- _0xKLM456
+-- _0xNOP789
+-- _0xQRS012
+-- _0xTUV345
+-- _0xWXY678
+-- _0xZAB901
+-- _0xCDE234
+-- _0xFGH567
+-- _0xIJK890
+-- _0xLMN123
+-- _0xOPQ456
+-- _0xRST789
+-- _0xUVW012
+-- _0xXYZ345
+-- _0xABC678
+-- _0xDEF901
+-- _0xGHI234
+-- _0xJKL567
+-- _0xMNO890
